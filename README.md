@@ -6,7 +6,7 @@ Demo: (not yet available)
 
 ## Usage
 
-Include `markerVectorAnimate.js` after Google Maps and call `growUp`, `fadeIn`, `fadeOut` on a `google.maps.Marker` with marker.circle == google.maps.Circle:
+Include `vectorMarkerAnimate.js` after Google Maps and call `bindCircle`, `growUp`, `fadeIn`, `fadeOut` on a `google.maps.Marker`:
 
     // params:
     // map                - the google map where place the marker (not for fadeOut)
@@ -21,11 +21,11 @@ Include `markerVectorAnimate.js` after Google Maps and call `growUp`, `fadeIn`, 
 ## Example
 
     var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(center_coord_lat,center_coord_lon),
+        position: new google.maps.LatLng(lat,lon),
         visible: false
     });
                                       
-    marker.circle = new google.maps.Circle({
+    marker.bindCircle({
         map: map,
         radius: 100000,
         strokeColor: "red",
@@ -34,9 +34,6 @@ Include `markerVectorAnimate.js` after Google Maps and call `growUp`, `fadeIn`, 
         fillOpacity: 0.5
     });
                                                         
-    marker.circle.bindTo('map',marker);
-    marker.circle.bindTo('center', marker, 'position');                                                   
-    
     marker.growUp(map, {duration: 3000});
     $("#fadeout").click(function() { marker.fadeOut(); });
 
