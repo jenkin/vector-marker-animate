@@ -1,33 +1,42 @@
 # Animated marker movement in Google Maps
 
-A nice alternative to `marker.setPosition(latLng)`. Include jQuery and jQuery Easing Plugin for more easing options.
+A nice alternative to `marker.setMap(map)`. Include jQuery and jQuery Easing Plugin for more easing options.
 
-Demo: http://robsite.net/static/markermove/markermove.html (click on the map)
+Demo: (not yet available)
 
 ## Usage
 
-Include `markerAnimate.js` after Google Maps and call `animateTo` on a `google.maps.Marker`:
+Include `markerVectorAnimate.js` after Google Maps and call `growUp`, `fadeIn`, `fadeOut` on a `google.maps.Marker` with marker.circle == google.maps.Circle:
 
     // params:
-    // newPosition        - the new Position as google.maps.LatLng()
+    // map                - the google map where place the marker (not for fadeOut)
     // options.duration   - animation duration in ms (default 1000)
     // options.easing     - easing function from jQuery and/or the jQuery easing plugin (default 'linear')
     // options.complete   - callback function. Gets called, after the animation has finished
 
-    marker.animateTo(newPosition [, {easing: 'easeOutBounce', duration: 1000, complete: function(){}}]);
+    marker.growUp(map [, {easing: 'easeOutBounce', duration: 1000, complete: function(){}}]);
+    marker.fadeIn(map [, {easing: 'easeOutBounce', duration: 1000, complete: function(){}}]);
+    marker.fadeOut([, {easing: 'easeOutBounce', duration: 1000, complete: function(){}}]);
 
 ## Example
 
-    var marker = new google.maps.Marker({position: new google.maps.LatLng(0,0), map: myMap, title: 'Hello World!'});
-    var newPosition = new google.maps.LatLng(13,42);
+    var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(center_coord_lat,center_coord_lon),
+        visible: false
+    });
+                                      
+    marker.circle = new google.maps.Circle({
+        map: map,
+        radius: 100000,
+        strokeColor: "red",
+        strokeWeight: 1,
+        fillColor: "red",
+        fillOpacity: 0.5
+    });
+                                                        
+    marker.circle.bindTo('map',marker);
+    marker.circle.bindTo('center', marker, 'position');                                                   
+    
+    marker.growUp(map, {duration: 3000});
+    $("#fadeout").click(function() { marker.fadeOut(); });
 
-    // move marker in 1000ms and with linear animation.
-    marker.animateTo(newPosition); 
-
-    // or with callback and options for easing and duration in milliseconds. Needs jQuery Easing Plugin.
-    marker.animateTo(newPosition, {  easing: "easeOutBounce",
-                                     duration: 1000,
-                                     complete: function() {
-                                       alert("animation complete");
-                                     }
-                                  });
