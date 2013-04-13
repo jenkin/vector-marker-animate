@@ -2,7 +2,7 @@
 
 A nice alternative to `marker.setMap(map)`. Include jQuery and jQuery Easing Plugin for more easing options.
 
-Demo: (not yet available)
+Demo: http://www.dataninja.it/libs/google/maps/vectorMarkerAnimate/demo/vectorMarkerAnimate.html
 
 ## Usage
 
