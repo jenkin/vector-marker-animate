@@ -9,11 +9,14 @@
 // options.complete   - callback function. Gets called, after the animation has finished
 google.maps.Marker.prototype.bindCircle = function(options) {
     var options = options || {};
+    this.setVisible(false);
     this.circle = new google.maps.Circle(options);
     this.circle.bindTo('map',this);
     this.circle.bindTo('center',this,'position');
 }
 
+
+/***************** GROW UP ********************/
 google.maps.Marker.prototype.growUp = function(map, options) {
   defaultOptions = {
     duration: 1000,
@@ -37,7 +40,7 @@ google.maps.Marker.prototype.growUp = function(map, options) {
   
   // Throw exception if marker.circle is not defined
   if (!this.hasOwnProperty("circle")) {
-    throw 'There is no circle binded to marker to animate! Before growUp() you have to set marker.circle = new google.maps.Circle({options}).';
+    throw 'There is no circle binded to marker to animate! Before growUp() you have to call marker.bindCircle({options}).';
     return;
   }
 
@@ -45,10 +48,10 @@ google.maps.Marker.prototype.growUp = function(map, options) {
   window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
   // save finale circle radius. prefixed to avoid name collisions.
-  this.AT_endRadius = this.circle.getRadius();
-  this.AT_startRadius = 0;
-  this.circle.setRadius(this.AT_startRadius);
-
+  this.circle.jnkEndRadius = this.circle.getRadius();
+  this.circle.jnkStartRadius = 0;
+  
+  this.circle.setRadius(this.jnkStartRadius);
   this.setMap(map);
 
   var animateStep = function(marker, startTime) {            
@@ -62,20 +65,20 @@ google.maps.Marker.prototype.growUp = function(map, options) {
     }
     
     if (durationRatio < 1) {
-      var deltaRadius = marker.AT_startRadius + (marker.AT_endRadius - marker.AT_startRadius)*easingDurationRatio;
+      var deltaRadius = marker.circle.jnkStartRadius + (marker.circle.jnkEndRadius - marker.circle.jnkStartRadius)*easingDurationRatio;
       
       marker.circle.setRadius(deltaRadius);
 
       // use requestAnimationFrame if it exists on this browser. If not, use setTimeout with ~60 fps
       if (window.requestAnimationFrame) {
-        marker.AT_animationHandler = window.requestAnimationFrame(function() {animateStep(marker, startTime)});                
+        marker.jnkAnimationHandler = window.requestAnimationFrame(function() {animateStep(marker, startTime)});                
       } else {
-        marker.AT_animationHandler = setTimeout(function() {animateStep(marker, startTime)}, 17); 
+        marker.jnkAnimationHandler = setTimeout(function() {animateStep(marker, startTime)}, 17); 
       }
 
     } else {
       
-      marker.circle.setRadius(marker.AT_endRadius);
+      marker.circle.setRadius(marker.circle.jnkEndRadius);
 
       if (typeof options.complete === 'function') {
         options.complete();
@@ -86,14 +89,16 @@ google.maps.Marker.prototype.growUp = function(map, options) {
 
   // stop possibly running animation
   if (window.cancelAnimationFrame) {
-    window.cancelAnimationFrame(this.AT_animationHandler);
+    window.cancelAnimationFrame(this.jnkAnimationHandler);
   } else {
-    clearTimeout(this.AT_animationHandler); 
+    clearTimeout(this.jnkAnimationHandler); 
   }
   
   animateStep(this, (new Date()).getTime());
 }
 
+
+/***************** FADE IN (defunct) ********************/
 google.maps.Marker.prototype.fadeIn = function(map, options) {
   defaultOptions = {
     duration: 1000,
@@ -117,7 +122,7 @@ google.maps.Marker.prototype.fadeIn = function(map, options) {
   
   // Throw exception if marker.circle is not defined
   if (!this.hasOwnProperty("circle")) {
-    throw 'There is no circle binded to marker to animate! Before growUp() you have to set marker.circle = new google.maps.Circle({options}).';
+    throw 'There is no circle binded to marker to animate! Before fadeIn() you have to call marker.bindCircle({options}).';
     return;
   }
 
@@ -125,12 +130,12 @@ google.maps.Marker.prototype.fadeIn = function(map, options) {
   window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
   // save finale circle radius. prefixed to avoid name collisions.
-  this.AT_endFillOpacity = this.circle.fillOpacity || 1.0;
-  this.AT_endStrokeOpacity = this.circle.strokeOpacity || 1.0;
-  this.AT_startFillOpacity = 0.0;
-  this.AT_startStrokeOpacity = 0.0;
-  this.circle.setOptions({fillOpacity: this.AT_startFillOpacity, strokeOpacity: this.AT_startStrokeOpacity});
-
+  this.circle.jnkEndFillOpacity = this.circle.fillOpacity || 1;
+  this.circle.jnkEndStrokeOpacity = this.circle.strokeOpacity || 1;
+  this.circle.jnkStartFillOpacity = 0;
+  this.circle.jnkStartStrokeOpacity = 0;
+  
+  this.circle.setOptions({fillOpacity: 0, strokeOpacity: 0});
   this.setMap(map);
 
   var animateStep = function(marker, startTime) {            
@@ -144,21 +149,21 @@ google.maps.Marker.prototype.fadeIn = function(map, options) {
     }
     
     if (durationRatio < 1) {
-      var deltaFillOpacity = marker.AT_startFillOpacity + (marker.AT_endFillOpacity - marker.AT_startFillOpacity)*easingDurationRatio;
-      var deltaStrokeOpacity = marker.AT_startStrokeOpacity + (marker.AT_endStrokeOpacity - marker.AT_startStrokeOpacity)*easingDurationRatio;
+      var deltaFillOpacity = marker.circle.jnkStartFillOpacity + (marker.circle.jnkEndFillOpacity - marker.circle.jnkStartFillOpacity)*easingDurationRatio;
+      var deltaStrokeOpacity = marker.circle.jnkStartStrokeOpacity + (marker.circle.jnkEndStrokeOpacity - marker.circle.jnkStartStrokeOpacity)*easingDurationRatio;
       
       marker.circle.setOptions({fillOpacity: deltaFillOpacity, strokeOpacity: deltaStrokeOpacity});
 
       // use requestAnimationFrame if it exists on this browser. If not, use setTimeout with ~60 fps
       if (window.requestAnimationFrame) {
-        marker.AT_animationHandler = window.requestAnimationFrame(function() {animateStep(marker, startTime)});                
+        marker.jnkAnimationHandler = window.requestAnimationFrame(function() {animateStep(marker, startTime)});                
       } else {
-        marker.AT_animationHandler = setTimeout(function() {animateStep(marker, startTime)}, 17); 
+        marker.jnkAnimationHandler = setTimeout(function() {animateStep(marker, startTime)}, 17); 
       }
 
     } else {
       
-      marker.circle.setOptions({fillOpacity: this.AT_endFillOpacity, strokeOpacity: this.AT_endStrokeOpacity});
+      marker.circle.setOptions({fillOpacity: marker.circle.jnkEndFillOpacity, strokeOpacity: marker.circle.jnkEndStrokeOpacity});
 
       if (typeof options.complete === 'function') {
         options.complete();
@@ -169,14 +174,16 @@ google.maps.Marker.prototype.fadeIn = function(map, options) {
 
   // stop possibly running animation
   if (window.cancelAnimationFrame) {
-    window.cancelAnimationFrame(this.AT_animationHandler);
+    window.cancelAnimationFrame(this.jnkAnimationHandler);
   } else {
-    clearTimeout(this.AT_animationHandler); 
+    clearTimeout(this.jnkAnimationHandler); 
   }
   
   animateStep(this, (new Date()).getTime());
 }
 
+
+/***************** FADE OUT ********************/
 google.maps.Marker.prototype.fadeOut = function(options) {
   defaultOptions = {
     duration: 1000,
@@ -200,7 +207,7 @@ google.maps.Marker.prototype.fadeOut = function(options) {
   
   // Throw exception if marker.circle is not defined
   if (!this.hasOwnProperty("circle")) {
-    throw 'There is no circle binded to marker to animate! Before growUp() you have to set marker.circle = new google.maps.Circle({options}).';
+    throw 'There is no circle binded to marker to animate! Before fadeOut() you have to call marker.bindCircle({options}).';
     return;
   }
 
@@ -208,10 +215,10 @@ google.maps.Marker.prototype.fadeOut = function(options) {
   window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
   // save finale circle radius. prefixed to avoid name collisions.
-  this.AT_startFillOpacity = this.circle.fillOpacity;
-  this.AT_startStrokeOpacity = this.circle.strokeOpacity;
-  this.AT_endFillOpacity = 0.0;
-  this.AT_endStrokeOpacity = 0.0;
+  this.circle.jnkStartFillOpacity = this.circle.fillOpacity || 1.0;
+  this.circle.jnkStartStrokeOpacity = this.circle.strokeOpacity || 1.0;
+  this.circle.jnkEndFillOpacity = 0;
+  this.circle.jnkEndStrokeOpacity = 0;
 
   var animateStep = function(marker, startTime) {            
     var ellapsedTime = (new Date()).getTime() - startTime;
@@ -224,24 +231,23 @@ google.maps.Marker.prototype.fadeOut = function(options) {
     }
     
     if (durationRatio < 1) {
-      var deltaFillOpacity = marker.AT_startFillOpacity + (marker.AT_endFillOpacity - marker.AT_startFillOpacity)*easingDurationRatio;
-      var deltaStrokeOpacity = marker.AT_startStrokeOpacity + (marker.AT_endStrokeOpacity - marker.AT_startStrokeOpacity)*easingDurationRatio;
+      var deltaFillOpacity = marker.circle.jnkStartFillOpacity + (marker.circle.jnkEndFillOpacity - marker.circle.jnkStartFillOpacity)*easingDurationRatio;
+      var deltaStrokeOpacity = marker.circle.jnkStartStrokeOpacity + (marker.circle.jnkEndStrokeOpacity - marker.circle.jnkStartStrokeOpacity)*easingDurationRatio;
       
-      marker.circle.setOptions({fillOpacity: deltaFillOpacity});
-      marker.circle.setOptions({strokeOpacity: deltaStrokeOpacity});
+      marker.circle.setOptions({fillOpacity: deltaFillOpacity, strokeOpacity: deltaStrokeOpacity});
 
       // use requestAnimationFrame if it exists on this browser. If not, use setTimeout with ~60 fps
       if (window.requestAnimationFrame) {
-        marker.AT_animationHandler = window.requestAnimationFrame(function() {animateStep(marker, startTime)});                
+        marker.jnkAnimationHandler = window.requestAnimationFrame(function() {animateStep(marker, startTime)});                
       } else {
-        marker.AT_animationHandler = setTimeout(function() {animateStep(marker, startTime)}, 17); 
+        marker.jnkAnimationHandler = setTimeout(function() {animateStep(marker, startTime)}, 17); 
       }
 
     } else {
       
-      marker.circle.setOptions({fillOpacity: this.AT_endFillOpacity});
-      marker.circle.setOptions({strokeOpacity: this.AT_endStrokeOpacity});
+      marker.circle.setOptions({fillOpacity: marker.circle.jnkEndFillOpacity, strokeOpacity: marker.circle.jnkEndStrokeOpacity});
       marker.setMap(null);
+      marker.circle.setOptions({fillOpacity: marker.circle.jnkStartFillOpacity, strokeOpacity: marker.circle.jnkStartStrokeOpacity});
 
       if (typeof options.complete === 'function') {
         options.complete();
@@ -252,9 +258,9 @@ google.maps.Marker.prototype.fadeOut = function(options) {
 
   // stop possibly running animation
   if (window.cancelAnimationFrame) {
-    window.cancelAnimationFrame(this.AT_animationHandler);
+    window.cancelAnimationFrame(this.jnkAnimationHandler);
   } else {
-    clearTimeout(this.AT_animationHandler); 
+    clearTimeout(this.jnkAnimationHandler); 
   }
   
   animateStep(this, (new Date()).getTime());

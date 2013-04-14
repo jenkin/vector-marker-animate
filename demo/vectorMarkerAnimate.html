@@ -8,7 +8,6 @@
 
         <!-- Style -->
         <style type="text/css">
-            @import "../../../libs/jquery/jquery.svg.css";
             body { height: 100%; margin: 0px; padding: 10px; }
             #map_canvas { height: 480px; width: 640px; }
             div.marker { padding: 0; margin: 0; }
@@ -55,10 +54,8 @@
                     });
 
                 marker.growUp(map, {duration: 3000});
-                $("#fadeout").click(function() { 
-                        marker.fadeOut();
-                        $("#fadein").click(function() { marker.fadeIn(map); });
-                });
+                $("#fadeout").click(function() { marker.fadeOut(); });
+                $("#fadein").click(function() { marker.fadeIn(map); });
             }
         </script>
     </head>
