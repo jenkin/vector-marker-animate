@@ -1,3 +1,5 @@
+_Original README file from forked project_
+
 # Animated marker movement in Google Maps
 
 A nice alternative to `marker.setMap(map)`. Include jQuery and jQuery Easing Plugin for more easing options.
